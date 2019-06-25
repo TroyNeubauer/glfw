@@ -44,12 +44,17 @@ project "GLFW"
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
+		inlining "auto"
 
 	filter "configurations:Release"
 		runtime "Release"
-		optimize "on"
+		optimize "speed"
+		inlining "auto"
+
 
 	filter "configurations:Dist"
 		runtime "Release"
-		optimize "on"
+		optimize "speed"
+		inlining "auto"
+
 
