@@ -83,3 +83,12 @@ tests/title
 tests/triangle-vulkan
 tests/windows
 
+
+
+# Directories
+.vs/
+bin/
+bin-int/
+
+# Files
+*.user
