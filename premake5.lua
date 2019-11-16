@@ -56,7 +56,8 @@ project "GLFW"
 			"src/x11_window.c",
 			"src/glx_context.c",
 			"src/egl_context.c",
-			"src/osmesa_context.c"
+			"src/osmesa_context.c",
+			"src/xkb_unicode.c",
 		}
 
 		defines 
