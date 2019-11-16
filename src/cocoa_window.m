@@ -35,15 +35,14 @@
 //
 static NSUInteger getStyleMask(_GLFWwindow* window)
 {
-    NSUInteger styleMask = 0;
+    NSUInteger styleMask = NSWindowStyleMaskMiniaturizable;
 
     if (window->monitor || !window->decorated)
         styleMask |= NSWindowStyleMaskBorderless;
     else
     {
         styleMask |= NSWindowStyleMaskTitled |
-                     NSWindowStyleMaskClosable |
-                     NSWindowStyleMaskMiniaturizable;
+                     NSWindowStyleMaskClosable;
 
         if (window->resizable)
             styleMask |= NSWindowStyleMaskResizable;
@@ -612,10 +611,8 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
 
 - (void)scrollWheel:(NSEvent *)event
 {
-    double deltaX, deltaY;
-
-    deltaX = [event scrollingDeltaX];
-    deltaY = [event scrollingDeltaY];
+    double deltaX = [event scrollingDeltaX];
+    double deltaY = [event scrollingDeltaY];
 
     if ([event hasPreciseScrollingDeltas])
     {
@@ -732,9 +729,8 @@ static const NSRange kEmptyRange = { NSNotFound, 0 };
     else
         characters = (NSString*) string;
 
-    NSUInteger i, length = [characters length];
-
-    for (i = 0;  i < length;  i++)
+    const NSUInteger length = [characters length];
+    for (NSUInteger i = 0;  i < length;  i++)
     {
         const unichar codepoint = [characters characterAtIndex:i];
         if ((codepoint & 0xff00) == 0xf700)
@@ -819,7 +815,7 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
         [window->ns.object setLevel:NSMainMenuWindowLevel + 1];
     else
     {
-        [window->ns.object center];
+        [(NSWindow*) window->ns.object center];
         _glfw.ns.cascadePoint =
             NSPointToCGPoint([window->ns.object cascadeTopLeftFromPoint:
                               NSPointFromCGPoint(_glfw.ns.cascadePoint)]);
@@ -965,6 +961,9 @@ void _glfwPlatformDestroyWindow(_GLFWwindow* window)
     [window->ns.object close];
     window->ns.object = nil;
 
+    // HACK: Allow Cocoa to catch up before returning
+    _glfwPlatformPollEvents();
+
     } // autoreleasepool
 }
 
@@ -1035,7 +1034,14 @@ void _glfwPlatformSetWindowSize(_GLFWwindow* window, int width, int height)
             acquireMonitor(window);
     }
     else
-        [window->ns.object setContentSize:NSMakeSize(width, height)];
+    {
+        NSRect contentRect =
+            [window->ns.object contentRectForFrameRect:[window->ns.object frame]];
+        contentRect.origin.y += contentRect.size.height - height;
+        contentRect.size = NSMakeSize(width, height);
+        [window->ns.object setFrame:[window->ns.object frameRectForContentRect:contentRect]
+                            display:YES];
+    }
 
     } // autoreleasepool
 }
@@ -1224,7 +1230,7 @@ void _glfwPlatformSetWindowMonitor(_GLFWwindow* window,
     // HACK: Changing the style mask can cause the first responder to be cleared
     [window->ns.object makeFirstResponder:window->ns.view];
 
-    if (monitor)
+    if (window->monitor)
     {
         [window->ns.object setLevel:NSMainMenuWindowLevel + 1];
         [window->ns.object setHasShadow:NO];
@@ -1506,8 +1512,10 @@ const char* _glfwPlatformGetScancodeName(int scancode)
 {
     @autoreleasepool {
 
+    const int key = _glfw.ns.keycodes[scancode];
+
     UInt32 deadKeyState = 0;
-    UniChar characters[8];
+    UniChar characters[4];
     UniCharCount characterCount = 0;
 
     if (UCKeyTranslate([(NSData*) _glfw.ns.unicodeData bytes],
@@ -1532,12 +1540,12 @@ const char* _glfwPlatformGetScancodeName(int scancode)
                                                             characterCount,
                                                             kCFAllocatorNull);
     CFStringGetCString(string,
-                       _glfw.ns.keyName,
-                       sizeof(_glfw.ns.keyName),
+                       _glfw.ns.keynames[key],
+                       sizeof(_glfw.ns.keynames[key]),
                        kCFStringEncodingUTF8);
     CFRelease(string);
 
-    return _glfw.ns.keyName;
+    return _glfw.ns.keynames[key];
 
     } // autoreleasepool
 }
