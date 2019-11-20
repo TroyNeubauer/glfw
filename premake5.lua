@@ -15,7 +15,9 @@ project "GLFW"
 		"src/input.c",
 		"src/monitor.c",
 		"src/vulkan.c",
-		"src/window.c"
+		"src/window.c",
+		"src/egl_context.c",
+		"src/osmesa_context.c"
 	}
 	
 	defines "_GLFW_VULKAN_STATIC"
@@ -33,8 +35,6 @@ project "GLFW"
 			"src/win32_thread.c",
 			"src/win32_window.c",
 			"src/wgl_context.c",
-			"src/egl_context.c",
-			"src/osmesa_context.c"
 		}
 
 		defines 
@@ -55,14 +55,12 @@ project "GLFW"
 			"src/posix_thread.c",
 			"src/x11_window.c",
 			"src/glx_context.c",
-			"src/egl_context.c",
-			"src/osmesa_context.c"
+			"src/xkb_unicode.c",
 		}
 
 		defines 
 		{ 
 			"_GLFW_X11",
-			"_CRT_SECURE_NO_WARNINGS"
 		}
 		
 		
