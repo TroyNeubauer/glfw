@@ -96,11 +96,30 @@ extern "C" {
  #define _WIN32
 #endif /* _WIN32 */
 
+/* Include because most Windows GLU headers need wchar_t and
+ * the macOS OpenGL header blocks the definition of ptrdiff_t by glext.h.
+ * Include it unconditionally to avoid surprising side-effects.
+ */
+#include <stddef.h>
+
+/* Include because it is needed by Vulkan and related functions.
+ * Include it unconditionally to avoid surprising side-effects.
+ */
+#include <stdint.h>
+
+#if defined(GLFW_INCLUDE_VULKAN)
+  #include <vulkan/vulkan.h>
+#endif /* Vulkan header */
+
+/* The Vulkan header may have indirectly included windows.h (because of
+ * VK_USE_PLATFORM_WIN32_KHR) so we offer our replacement symbols after it.
+ */
+
 /* It is customary to use APIENTRY for OpenGL function pointer declarations on
  * all platforms.  Additionally, the Windows OpenGL header needs APIENTRY.
  */
-#ifndef APIENTRY
- #ifdef _WIN32
+#if !defined(APIENTRY)
+ #if defined(_WIN32)
   #define APIENTRY __stdcall
  #else
   #define APIENTRY
@@ -121,17 +140,6 @@ extern "C" {
  #define CALLBACK __stdcall
  #define GLFW_CALLBACK_DEFINED
 #endif /* CALLBACK */
-
-/* Include because most Windows GLU headers need wchar_t and
- * the macOS OpenGL header blocks the definition of ptrdiff_t by glext.h.
- * Include it unconditionally to avoid surprising side-effects.
- */
-#include <stddef.h>
-
-/* Include because it is needed by Vulkan and related functions.
- * Include it unconditionally to avoid surprising side-effects.
- */
-#include <stdint.h>
 
 /* Include the chosen OpenGL or OpenGL ES headers.
  */
@@ -210,10 +218,6 @@ extern "C" {
  #endif /*__APPLE__*/
 
 #endif /* OpenGL and OpenGL ES headers */
-
-#if defined(GLFW_INCLUDE_VULKAN)
-  #include <vulkan/vulkan.h>
-#endif /* Vulkan header */
 
 #if defined(GLFW_DLL) && defined(_GLFW_BUILD_DLL)
  /* GLFW_DLL must be defined by applications that are linking against the DLL
@@ -999,6 +1003,7 @@ extern "C" {
  *  [window hint](@ref GLFW_X11_CLASS_NAME_hint).
  */
 #define GLFW_X11_INSTANCE_NAME      0x00024002
+#define GLFW_WIN32_KEYBOARD_MENU    0x00025001
 /*! @} */
 
 #define GLFW_NO_API                          0
@@ -2037,7 +2042,7 @@ GLFWAPI GLFWmonitor* glfwGetPrimaryMonitor(void);
  */
 GLFWAPI void glfwGetMonitorPos(GLFWmonitor* monitor, int* xpos, int* ypos);
 
-/*! @brief Retrives the work area of the monitor.
+/*! @brief Retrieves the work area of the monitor.
  *
  *  This function returns the position, in screen coordinates, of the upper-left
  *  corner of the work area of the specified monitor along with the work area
@@ -2321,7 +2326,7 @@ GLFWAPI const GLFWvidmode* glfwGetVideoMode(GLFWmonitor* monitor);
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED, @ref
  *  GLFW_INVALID_VALUE and @ref GLFW_PLATFORM_ERROR.
  *
- *  @remark @wayland Gamma handling is a priviledged protocol, this function
+ *  @remark @wayland Gamma handling is a privileged protocol, this function
  *  will thus never be implemented and emits @ref GLFW_PLATFORM_ERROR.
  *
  *  @thread_safety This function must only be called from the main thread.
@@ -2345,7 +2350,7 @@ GLFWAPI void glfwSetGamma(GLFWmonitor* monitor, float gamma);
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
  *  GLFW_PLATFORM_ERROR.
  *
- *  @remark @wayland Gamma handling is a priviledged protocol, this function
+ *  @remark @wayland Gamma handling is a privileged protocol, this function
  *  will thus never be implemented and emits @ref GLFW_PLATFORM_ERROR while
  *  returning `NULL`.
  *
@@ -2389,7 +2394,7 @@ GLFWAPI const GLFWgammaramp* glfwGetGammaRamp(GLFWmonitor* monitor);
  *
  *  @remark @win32 The gamma ramp size must be 256.
  *
- *  @remark @wayland Gamma handling is a priviledged protocol, this function
+ *  @remark @wayland Gamma handling is a privileged protocol, this function
  *  will thus never be implemented and emits @ref GLFW_PLATFORM_ERROR.
  *
  *  @pointer_lifetime The specified gamma ramp is copied before this function
@@ -2576,12 +2581,11 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *  @remark @win32 The context to share resources with must not be current on
  *  any other thread.
  *
- *  @remark @macos The OS only supports forward-compatible core profile contexts
- *  for OpenGL versions 3.2 and later.  Before creating an OpenGL context of
- *  version 3.2 or later you must set the
- *  [GLFW_OPENGL_FORWARD_COMPAT](@ref GLFW_OPENGL_FORWARD_COMPAT_hint) and
- *  [GLFW_OPENGL_PROFILE](@ref GLFW_OPENGL_PROFILE_hint) hints accordingly.
- *  OpenGL 3.0 and 3.1 contexts are not supported at all on macOS.
+ *  @remark @macos The OS only supports core profile contexts for OpenGL
+ *  versions 3.2 and later.  Before creating an OpenGL context of version 3.2 or
+ *  later you must set the [GLFW_OPENGL_PROFILE](@ref GLFW_OPENGL_PROFILE_hint)
+ *  hint accordingly.  OpenGL 3.0 and 3.1 contexts are not supported at all
+ *  on macOS.
  *
  *  @remark @macos The GLFW window has no icon, as it is not a document
  *  window, but the dock icon will be the same as the application bundle's icon.
@@ -2608,7 +2612,7 @@ GLFWAPI void glfwWindowHintString(int hint, const char* value);
  *
  *  @remark @macos When activating frame autosaving with
  *  [GLFW_COCOA_FRAME_NAME](@ref GLFW_COCOA_FRAME_NAME_hint), the specified
- *  window size and position may be overriden by previously saved values.
+ *  window size and position may be overridden by previously saved values.
  *
  *  @remark @x11 Some window managers will not respect the placement of
  *  initially hidden windows.
@@ -4186,9 +4190,11 @@ GLFWAPI int glfwRawMouseMotionSupported(void);
  *  @errors Possible errors include @ref GLFW_NOT_INITIALIZED and @ref
  *  GLFW_PLATFORM_ERROR.
  *
+ *  @remark The contents of the returned string may change when a keyboard
+ *  layout change event is received.
+ *
  *  @pointer_lifetime The returned string is allocated and freed by GLFW.  You
- *  should not free it yourself.  It is valid until the next call to @ref
- *  glfwGetKeyName, or until the library is terminated.
+ *  should not free it yourself.  It is valid until the library is terminated.
  *
  *  @thread_safety This function must only be called from the main thread.
  *
@@ -4978,7 +4984,7 @@ GLFWAPI const unsigned char* glfwGetJoystickHats(int jid, int* count);
  */
 GLFWAPI const char* glfwGetJoystickName(int jid);
 
-/*! @brief Returns the SDL comaptible GUID of the specified joystick.
+/*! @brief Returns the SDL compatible GUID of the specified joystick.
  *
  *  This function returns the SDL compatible GUID, as a UTF-8 encoded
  *  hexadecimal string, of the specified joystick.  The returned string is
@@ -5199,7 +5205,7 @@ GLFWAPI const char* glfwGetGamepadName(int jid);
 
 /*! @brief Retrieves the state of the specified joystick remapped as a gamepad.
  *
- *  This function retrives the state of the specified joystick remapped to
+ *  This function retrieves the state of the specified joystick remapped to
  *  an Xbox-like gamepad.
  *
  *  If the specified joystick is not present or does not have a gamepad mapping
@@ -5643,7 +5649,7 @@ GLFWAPI int glfwVulkanSupported(void);
  *
  *  This function returns an array of names of Vulkan instance extensions required
  *  by GLFW for creating Vulkan surfaces for GLFW windows.  If successful, the
- *  list will always contains `VK_KHR_surface`, so if you don't require any
+ *  list will always contain `VK_KHR_surface`, so if you don't require any
  *  additional extensions you can pass this list directly to the
  *  `VkInstanceCreateInfo` struct.
  *
