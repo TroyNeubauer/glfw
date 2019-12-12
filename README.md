@@ -11,7 +11,7 @@ application development.  It provides a simple, platform-independent API for
 creating windows, contexts and surfaces, reading input, handling events, etc.
 
 GLFW natively supports Windows, macOS and Linux and other Unix-like systems.  On
-Linux both X11 and Wayland is supported.
+Linux both X11 and Wayland are supported.
 
 GLFW is licensed under the [zlib/libpng
 license](http://www.glfw.org/license.html).
@@ -85,10 +85,11 @@ in the documentation for more information.
 
 ## Dependencies
 
-GLFW itself depends only on the headers and libraries for your window system.
+GLFW itself needs only CMake 3.1 or later and the headers and libraries for your
+OS and window system.
 
 The (experimental) Wayland backend also depends on the `extra-cmake-modules`
-package, which is used to generated Wayland protocol headers.
+package, which is used to generate Wayland protocol headers.
 
 The examples and test programs depend on a number of tiny libraries.  These are
 located in the `deps/` directory.
@@ -118,6 +119,12 @@ information on what to include when reporting a bug.
 
 ## Changelog
 
+ - Added `GLFW_RESIZE_NWSE_CURSOR`, `GLFW_RESIZE_NESW_CURSOR`,
+   `GLFW_RESIZE_ALL_CURSOR` and `GLFW_NOT_ALLOWED_CURSOR` cursor shapes (#427)
+ - Added `GLFW_RESIZE_EW_CURSOR` alias for `GLFW_HRESIZE_CURSOR` (#427)
+ - Added `GLFW_RESIZE_NS_CURSOR` alias for `GLFW_VRESIZE_CURSOR` (#427)
+ - Added `GLFW_POINTING_HAND_CURSOR` alias for `GLFW_HAND_CURSOR` (#427)
+ - Updated the minimum required CMake version to 3.1
  - Disabled tests and examples by default when built as a CMake subdirectory
  - Bugfix: The CMake config-file package used an absolute path and was not
    relocatable (#1470)
@@ -125,6 +132,7 @@ information on what to include when reporting a bug.
  - Bugfix: Compiling with -Wextra-semi caused warnings (#1440)
  - [Win32] Added the `GLFW_WIN32_KEYBOARD_MENU` window hint for enabling access
            to the window menu
+ - [Win32] Added a version info resource to the GLFW DLL
  - [Win32] Bugfix: `GLFW_INCLUDE_VULKAN` plus `VK_USE_PLATFORM_WIN32_KHR` caused
    symbol redefinition (#1524)
  - [Win32] Bugfix: The cursor position event was emitted before its cursor enter
@@ -134,12 +142,16 @@ information on what to include when reporting a bug.
  - [Cocoa] Bugfix: `glfwSetWindowSize` used a bottom-left anchor point (#1553)
  - [Cocoa] Bugfix: Window remained on screen after destruction until event poll
    (#1412)
+ - [Cocoa] Bugfix: Event processing before window creation would assert (#1543)
  - [X11] Bugfix: The CMake files did not check for the XInput headers (#1480)
  - [X11] Bugfix: Key names were not updated when the keyboard layout changed
    (#1462,#1528)
  - [X11] Bugfix: Decorations could not be enabled after window creation (#1566)
  - [X11] Bugfix: Content scale fallback value could be inconsistent (#1578)
+ - [Wayland] Bugfix: The `GLFW_HAND_CURSOR` shape used the wrong image (#1432)
  - [NSGL] Removed enforcement of forward-compatible flag for core contexts
+ - [NSGL] Bugfix: `GLFW_COCOA_RETINA_FRAMEBUFFER` had no effect on newer
+   macOS versions (#1442)
 
 
 ## Contact
@@ -292,6 +304,7 @@ skills.
  - Alexandre Pretyman
  - Pablo Prietz
  - przemekmirek
+ - pthom
  - Guillaume Racicot
  - Philip Rideout
  - Eddie Ringle
