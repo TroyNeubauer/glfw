@@ -13,7 +13,7 @@ project "GLFW"
 		"src/init.c",
 		"src/input.c",
 		"src/monitor.c",
-		--"src/vulkan.c",
+		"src/vulkan.c",
 		"src/window.c",
 		"src/egl_context.c",
 		"src/osmesa_context.c"
@@ -21,7 +21,7 @@ project "GLFW"
 	
 	defines 
 	{
-		--"_GLFW_VULKAN_STATIC",
+		"_GLFW_VULKAN_STATIC",
 	}
 	systemversion "latest"
 	
@@ -38,7 +38,7 @@ project "GLFW"
 			"src/wgl_context.c",
 		}
 
-		defines 
+		defines
 		{ 
 			"_GLFW_WIN32",
 			"_CRT_SECURE_NO_WARNINGS"
