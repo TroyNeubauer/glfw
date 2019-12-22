@@ -13,14 +13,16 @@ project "GLFW"
 		"src/init.c",
 		"src/input.c",
 		"src/monitor.c",
-		"src/vulkan.c",
+		--"src/vulkan.c",
 		"src/window.c",
 		"src/egl_context.c",
 		"src/osmesa_context.c"
 	}
 	
-	defines "_GLFW_VULKAN_STATIC"
-
+	defines 
+	{
+		--"_GLFW_VULKAN_STATIC",
+	}
 	systemversion "latest"
 	
 	filter "system:windows"
@@ -61,23 +63,24 @@ project "GLFW"
 		{ 
 			"_GLFW_X11",
 		}
+
+	filter "system:macosx"
+		
+		files
+		{
+			"src/cocoa_init.m",
+			"src/cocoa_joystick.m",
+			"src/cocoa_monitor.m",
+			"src/cocoa_time.c",
+			"src/posix_thread.c",
+			"src/cocoa_window.m",
+			"src/nsgl_context.m",
+		}
+
+		defines 
+		{
+			"_GLFW_COCOA",
+		}
 		
 		
-
-	filter "configurations:Debug"
-		runtime "Debug"
-		symbols "on"
-		inlining "auto"
-
-	filter "configurations:Release"
-		runtime "Release"
-		optimize "speed"
-		inlining "auto"
-
-
-	filter "configurations:Dist"
-		runtime "Release"
-		optimize "speed"
-		inlining "auto"
-
 
