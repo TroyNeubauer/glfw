@@ -1,6 +1,7 @@
 project "GLFW"
 	kind "StaticLib"
 	language "C"
+	systemversion "latest"
 	
 	targetdir ("../../../bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("../../../bin-int/" .. outputdir .. "/%{prj.name}")
@@ -19,11 +20,7 @@ project "GLFW"
 		"src/osmesa_context.c"
 	}
 	
-	defines 
-	{
-		"_GLFW_VULKAN_STATIC",
-	}
-	systemversion "latest"
+
 	
 	filter "system:windows"
 		
@@ -81,6 +78,5 @@ project "GLFW"
 		{
 			"_GLFW_COCOA",
 		}
-		
 		
 
