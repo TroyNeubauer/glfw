@@ -114,3 +114,10 @@ bin-int/
 
 **/.project
 **/.workspace
+
+#Android
+**/AndroidManifest.xml
+.modules
+**/build.gradle
+**/CMakeLists.txt
+
